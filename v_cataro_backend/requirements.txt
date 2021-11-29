@@ -1,0 +1,11 @@
+django
+djangorestframework
+django-filter
+pymysql
+django-cors-headers
+requests
+bs4
+kotodama
+janome
+pymagnitude
+lxml

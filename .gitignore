@@ -1,0 +1,3 @@
+# 学習済みのword2vecファイル
+# 4GB以上あるので，除外
+*.magnitude

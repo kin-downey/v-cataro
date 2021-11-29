@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./v-cataro-frontend/Dockerfile
+    container_name: v-cataro-frontend
+    ports:
+      - 8099:8080
+    volumes:
+      - ./v-cataro-frontend:/run/frontend
+      - /run/frontend/node_modules/
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+  
+  backend:
+    tty: true
+    build:
+      context: .
+      dockerfile: ./v_cataro_backend/Dockerfile
+    container_name: v-cataro-backend
+    ports:
+      - 8090:8000
+    volumes: 
+      - ./v_cataro_backend:/run/backend
+    environment:
+      - DJANGO_SETTING_MODULE=backend_django.settings
