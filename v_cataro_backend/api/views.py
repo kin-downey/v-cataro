@@ -94,7 +94,8 @@ def check_emotion(request) -> JsonResponse:
         # ランダムに相槌を選択
         aiduti = random.choice(aiduti_list)
         response ={
-            "sentence": aiduti + key_word + "ですね？"
+            "sentence": aiduti + key_word + "ですね？",
+            'emotion': "neutral"
         }
         return JsonResponse(response, status=201)
 
@@ -102,22 +103,31 @@ def check_emotion(request) -> JsonResponse:
         aiduti_list = ["それは良いですね！", "いいなー!", "素敵ですね！"]
         aiduti = random.choice(aiduti_list)
         response = {
-            "sentence": aiduti + key_word + 'ですか！'
+            "sentence": aiduti + key_word + 'ですか！',
+            "emotion": "happy"
         }
         return JsonResponse(response, status=201)
     
     elif max_emotion == "sad":
+        subjects = ['どのようなスポーツは好きですか？', '思い出に残っている旅行について教えてください', 'あなたの人生で最大の失敗はなんですか？', 'あなたの人生で最大の成功はなんですか？', '世界中の人に声が届くなら，なにを言いたいですか？']
+        new_subject = random.choice(subjects)
         aiduti = "そうだったのですね。話題を変えましょう"
 
         response = {
-            "sentence": aiduti
+            "sentence": aiduti,
+            "emotion": "sad",
+            "subject": new_subject
         }
         return JsonResponse(response, status=201)
 
     elif max_emotion == "angry":
+        subjects = ['どのようなスポーツは好きですか？', '思い出に残っている旅行について教えてください', 'あなたの人生で最大の失敗はなんですか？', 'あなたの人生で最大の成功はなんですか？', '世界中の人に声が届くなら，なにを言いたいですか？']
+        new_subject = random.choice(subjects)
         aiduti = "それは，ひどいですね！話題を変えましょう"
         response = {
-            "sentence": aiduti
+            "sentence": aiduti,
+            "emotion": "angry",
+            "subject": new_subject
         }
         return JsonResponse(response, status=201)
 
@@ -127,7 +137,8 @@ def check_emotion(request) -> JsonResponse:
         # ランダムに相槌を選択
         aiduti = random.choice(aiduti_list)
         response ={
-            "sentence": aiduti + key_word + "ですね？"
+            "sentence": aiduti + key_word + "ですね？",
+            "emotion": "fearful"
         }
         return JsonResponse(response, status=201)
     
@@ -137,7 +148,8 @@ def check_emotion(request) -> JsonResponse:
         # ランダムに相槌を選択
         aiduti = random.choice(aiduti_list)
         response ={
-            "sentence": aiduti + key_word + "ですね？"
+            "sentence": aiduti + key_word + "ですね？",
+            "emotion": "disgusted"
         }
         return JsonResponse(response, status=201)
     
@@ -145,7 +157,8 @@ def check_emotion(request) -> JsonResponse:
         aiduti_list = ["それは驚きです!", "わあ！", "びっくりです！"]
         aiduti = random.choice(aiduti_list)
         response = {
-            "sentence": aiduti + key_word + "ですか！"
+            "sentence": aiduti + key_word + "ですか！",
+            "emotion": "surprised"
         }
     
         
@@ -194,7 +207,7 @@ def generate_response(request) -> JsonResponse:
     # 格フレームの動詞を過去形に変換
     # 格と結びつける
     if case_frame["verb"] == "なし" and case_frame["case"] == "なし":
-        return JsonResponse({"sentence": "すみません．良い質問が思いつきませんでした．話題を変えても良いですか？"})
+        return JsonResponse({"sentence": "それは，どんなものですか？よろしければ，教えていただけますか？"})
     else:
         change = {"ヲ格": "を", "ニ格": "に", "ヘ格": "へ", "ガ格": "が", "ト格": "と", "デ格": "で", "ノ格": "の", "カラ格": "から"}
         if "noun" in case_frame.keys():
@@ -213,4 +226,4 @@ def generate_response(request) -> JsonResponse:
                 print("total_time: ", end - start)
                 return JsonResponse(response, status=201)
             except:
-                return JsonResponse({"sentence": "すみません．良い質問が思いつきませんでした．話題を変えても良いですか？"})
+                return JsonResponse({"sentence": "それは，どんなものですか？よろしければ，教えていただけますか？"})

@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <v-row>
-        <v-col align="center">
+        <v-col align="end">
           <img
             v-if="flag"
             src="../../public/CATARO_a_1.png"
@@ -18,38 +18,7 @@
             height="auto"
           />
         </v-col>
-      </v-row>
-      <v-btn @click="up_pitch()">pitch up</v-btn>
-      <v-btn @click="down_pitch()">pitch down</v-btn>
-      <v-btn @click="up_rate()">rate up</v-btn>
-      <v-btn @click="down_rate()">rate down</v-btn>
-      <v-btn @click="test_speech()">test speech</v-btn>
-      <div v-if="show_button">
-        <v-row align="center">
-          <v-col align="center">
-            <v-btn color="primary" @click="onclick()"> 実験開始 </v-btn>
-          </v-col>
-        </v-row>
-      </div>
-      <div v-else>
-        <v-row align="center">
-          <v-col align="center">
-            <h3>実験が開始されました</h3>
-            <h4>対話開始まで10秒ほどかかる場合があります．</h4>
-          </v-col>
-        </v-row>
-      </div>
-      <v-row class="mt-5">
-        <v-col align="center">
-          <p>{{ text }}</p>
-        </v-col>
-      </v-row>
-      <h3>{{this.pitch_message}}</h3>
-      <h4>{{this.pitch}}</h4>
-      <h3>{{this.rate_message}}</h3>
-      <h4>{{this.rate}}</h4>
-      <v-row>
-        <v-col class="mx-4">
+        <v-col align="center" class="mt-8">
           <div>
             <p>neutral: {{ neutral }}</p>
             <p>happy: {{ happy }}</p>
@@ -60,7 +29,22 @@
             <p>disgusted: {{ disgusted }}</p>
           </div>
         </v-col>
-        <v-col align="end" class="mx-4">
+      </v-row>
+      <v-row align="center" class="ma-2">
+        <v-col align="center">
+          <v-btn @click="up_pitch()">pitch up</v-btn>
+          <v-btn @click="down_pitch()">pitch down</v-btn>
+          <v-btn @click="up_rate()">rate up</v-btn>
+          <v-btn @click="down_rate()">rate down</v-btn>
+          <v-btn @click="test_speech()">test speech</v-btn>
+        </v-col>
+        <v-col class="mx-4">
+          <h3>{{ this.pitch_message }}</h3>
+          <h4>{{ this.pitch }}</h4>
+          <h3>{{ this.rate_message }}</h3>
+          <h4>{{ this.rate }}</h4>
+        </v-col>
+        <v-col>
           <video
             ref="video"
             id="video"
@@ -70,7 +54,27 @@
             muted
             autoplay
           ></video>
-          <canvas ref="canvas" id="myCanvas" width="1" height="1" />
+          <canvas ref="canvas" id="myCanvas" width="1" height="1"></canvas>
+        </v-col>
+      </v-row>
+      <div v-if="show_button">
+        <v-row align="center">
+          <v-col align="center">
+            <v-btn color="primary" @click="onclick()"> スタート </v-btn>
+          </v-col>
+        </v-row>
+      </div>
+      <div v-else>
+        <v-row align="center">
+          <v-col align="center">
+            <h3>対話が開始されました</h3>
+            <h4>対話開始まで10秒ほどかかる場合があります．</h4>
+          </v-col>
+        </v-row>
+      </div>
+      <v-row class="mt-5">
+        <v-col align="center">
+          <p>{{ text }}</p>
         </v-col>
       </v-row>
     </v-main>
@@ -114,7 +118,7 @@ export default {
       aiduti_obj: null,
       recog_flag: 0,
       response: "",
-      rate: 1,
+      rate: 0.8,
       pitch: 1,
       pitch_message: "pitch",
       pitch_min: 0,
@@ -122,6 +126,8 @@ export default {
       rate_message: "rate",
       rate_min: 0.5,
       rate_max: 10,
+      emotion: "",
+      subject: "",
     };
   },
   mounted() {
@@ -141,10 +147,13 @@ export default {
   methods: {
     test_speech() {
       const uttr = new SpeechSynthesisUtterance();
-      uttr.text = "こんにちは。昨日の夜ご飯に何を食べましたか？";
+      uttr.text = "マイクテスト．マイクテスト";
+      this.rate = 0.65;
+      this.pitch = 0.6;
       uttr.lang = "ja";
       uttr.pitch = this.pitch;
       uttr.rate = this.rate;
+      console.log("test: ", uttr.pitch);
       speechSynthesis.speak(uttr);
     },
     onclick() {
@@ -199,22 +208,35 @@ export default {
       this.recognition.start();
     },
     // 応答生成までの間に返す相槌（表情によって変化させる）
-    quick_respose(key_word) {
-      // APIによって感情に対応する応答を生成
-      // this.responseに生成した相槌を格納
-      this.api_emotion(key_word);
+    quick_response(key_word) {
+      const _this = this;
+      axios
+        .post("http://localhost:8090/hello/emotion", {
+          key_word: key_word,
+          neutral: this.neutral,
+          happy: this.happy,
+          sad: this.sad,
+          angry: this.angry,
+          fearful: this.fearful,
+          disgusted: this.disgusted,
+          surprised: this.surprised,
+        })
+        .then(function (response) {
+          _this.response = response.data.sentence;
+          _this.emotion = response.data.emotion;
+          if (_this.emotion == "sad") {
+            _this.pitch = 0.65;
+            _this.subject = response.data.subject;
+          } else if (_this.emotion == "angry") {
+            _this.pitch = 0.7;
+            _this.subject = response.data.subject;
+          } else if (_this.emotion == "happy") {
+            _this.pitch = 1.8;
+          }
 
-      // 音声合成の設定
-      const uttr = new SpeechSynthesisUtterance();
-      var move_mouse_obj = this.move_mouse();
-
-      // 喋らせる文章を生成
-      uttr.text = this.response;
-      uttr.lang = "ja";
-      speechSynthesis.speak(uttr);
-      uttr.onend = function () {
-        clearInterval(move_mouse_obj);
-      };
+          console.log(response.data.sentence);
+          _this.speak(_this.response);
+        });
     },
     async face_recog() {
       const detectionWithExpressions = await faceapi
@@ -231,25 +253,6 @@ export default {
 
       clearInterval(this.aiduti_obj);
     },
-    api_emotion(key_word) {
-      const _this = this;
-      axios
-        .post("http://localhost:8090/hello/emotion", {
-          key_word: key_word,
-          neutral: this.neutral,
-          happy: this.happy,
-          sad: this.sad,
-          angry: this.angry,
-          fearful: this.fearful,
-          disgusted: this.disgusted,
-          surprised: this.surprised,
-        })
-        .then(function (response) {
-          _this.response = response.data.sentence;
-          console.log(response.data.sentence);
-          _this.speak(_this.response);
-        });
-    },
     api_post(key_words) {
       let _this = this;
       axios
@@ -257,10 +260,16 @@ export default {
           word: key_words,
         })
         .then(function (response) {
-          console.log(response.data.sentence);
-          _this.speak(response.data.sentence);
-          console.log(response.data);
-          _this.word = "";
+          if (_this.emotion == "sad") {
+            _this.speak(_this.subject);
+          } else if (_this.emotion == "angry") {
+            _this.speak(_this.subject);
+          } else {
+            console.log(response.data.sentence);
+            _this.speak(response.data.sentence);
+            console.log(response.data);
+            _this.word = "";
+          }
         });
     },
     // 単語を形態素解析する
@@ -281,7 +290,7 @@ export default {
           }
           console.log("for key_word: ", key_words);
           this.api_post(key_words);
-          this.quick_respose(this.key_word);
+          this.quick_response(this.key_word);
         }
       });
     },
@@ -290,6 +299,8 @@ export default {
       var move_mouse_obj = this.move_mouse();
       uttr.text = "こんにちは。昨日の夜ご飯に何を食べましたか？";
       uttr.lang = "ja";
+      uttr.pitch = this.pitch;
+      uttr.rate = this.rate;
       speechSynthesis.speak(uttr);
       uttr.onend = function () {
         clearInterval(move_mouse_obj);
@@ -300,6 +311,9 @@ export default {
       var move_mouse_obj = this.move_mouse();
       uttr.text = key_word;
       uttr.lang = "ja";
+      // ピッチとレートを設定
+      uttr.pitch = this.pitch;
+      uttr.rate = this.rate;
       speechSynthesis.speak(uttr);
       this.user_name = "";
       const recognition = this.recognition;
@@ -321,27 +335,25 @@ export default {
       return this.move_mouse_obj;
     },
     up_pitch() {
-      if (this.pitch > 1.5){
+      if (this.pitch > 1.9) {
         this.pitch_message = "すでにピッチは最大値です．";
-      }
-      else{
-        this.pitch += 0.5;
+      } else {
+        this.pitch += 0.1;
       }
     },
     down_pitch() {
-      if  (this.pitch < 0.5){
+      if (this.pitch < 0.1) {
         this.pitch_message = "すでにピッチは最小です";
-      }
-      else{
+      } else {
         this.pitch_message = "";
-        this.pitch -= 0.5;
+        this.pitch -= 0.1;
       }
     },
     up_rate() {
-      this.rate += 0.5
+      this.rate += 0.1;
     },
     down_rate() {
-      this.rate -= 0.5;
+      this.rate -= 0.1;
     },
   },
 };
