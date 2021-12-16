@@ -121,7 +121,7 @@ def check_emotion(request) -> JsonResponse:
         return JsonResponse(response, status=201)
 
     elif max_emotion == "angry":
-        subjects = ['どのようなスポーツは好きですか？', '思い出に残っている旅行について教えてください', 'あなたの人生で最大の失敗はなんですか？', 'あなたの人生で最大の成功はなんですか？', '世界中の人に声が届くなら，なにを言いたいですか？']
+        subjects = ['どのようなスポーツが好きですか？', '思い出に残っている旅行について教えてください', 'あなたの人生で最大の失敗はなんですか？', 'あなたの人生で最大の成功はなんですか？', '世界中の人に声が届くなら，なにを言いたいですか？']
         new_subject = random.choice(subjects)
         aiduti = "それは，ひどいですね！話題を変えましょう"
         response = {

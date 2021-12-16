@@ -9,3 +9,4 @@ kotodama
 janome
 pymagnitude
 lxml
+pytz

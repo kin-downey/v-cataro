@@ -20,13 +20,13 @@
         </v-col>
         <v-col align="center" class="mt-8">
           <div>
-            <p>neutral: {{ neutral }}</p>
-            <p>happy: {{ happy }}</p>
-            <p>angry: {{ angry }}</p>
-            <p>sad: {{ sad }}</p>
-            <p>surprised: {{ surprised }}</p>
-            <p>fearful: {{ fearful }}</p>
-            <p>disgusted: {{ disgusted }}</p>
+            <p>neutral: 0.9809{{ neutral }}</p>
+            <p>happy: 0.000012{{ happy }}</p>
+            <p>angry: 0.0000052{{ angry }}</p>
+            <p>sad: 0.0000002{{ sad }}</p>
+            <p>surprised: 0.0000012{{ surprised }}</p>
+            <p>fearful: 0.0000026{{ fearful }}</p>
+            <p>disgusted: 0.0000002{{ disgusted }}</p>
           </div>
         </v-col>
       </v-row>
